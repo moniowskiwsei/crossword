@@ -13,7 +13,7 @@ export default function Sidebar() {
   const menuItems = [
     { name: 'Home', icon: FaHome, link: '/' },
     { name: 'Profile', icon: FaUser, link: '/protected/user/profile' },
-    { name: 'Game', icon: FaGamepad, link: '/protected/game' },
+    { name: 'Game', icon: FaGamepad, link: '/public/game' },
     { name: 'Articles', icon: FaBook, link: '/protected/user/articles' },
   ];
 
@@ -22,7 +22,7 @@ export default function Sidebar() {
   return (
     <div className={"h-screen w-64 bg-gray-900 text-white flex flex-col fixed overflow-x-auto z-10 " + (expanded ? 'block' : 'hidden')}>
       <div className="text-2xl font-bold p-4 flex items-center gap-3 relative">
-        Wykreślanka <FaGamepad className="text-green-500" />
+        Crossword <FaGamepad className="text-green-500" />
         <button className="absolute top-3 right-3" onClick={() => setExpanded(false)}><FaTimes /></button></div>
       <nav className="flex-1">
         <ul className="space-y-2">

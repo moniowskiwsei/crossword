@@ -1,6 +1,4 @@
-'use client'
-
-import React, { useState } from 'react';
+import { useEffect, useState } from "react";
 
 const allWords = [
     'CAT', 'DOG', 'SUN', 'CAR', 'BOX', 'MAP', 'BAT', 'HAT', 'NET', 'PEN', 'FOX', 'KEY', 'RUG', 'BUG', 'BEE', 'ZIP', 'JAR', 'VAN', 'GEM', 'CAP',
@@ -8,13 +6,9 @@ const allWords = [
     'APPLE', 'HOUSE', 'LIGHT', 'TABLE', 'WATER', 'CHAIR', 'PLANE', 'CANDY', 'MOUSE', 'PAPER', 'BREAD', 'STONE', 'CLOCK', 'BRICK', 'PLANT', 'HEART', 'CLOUD', 'TRAIN', 'STORM', 'BRUSH', 'PENCIL', 'DINNER', 'MARKER', 'BANNER', 'ROLLER', 'STREAM', 'VALLEY', 'TUNNEL', 'WINTER', 'BUTTON',
     'PLANET', 'PYTHON', 'EDITOR', 'DRAGON', 'PRINCE', 'CASTLE', 'RANGER', 'FARMER', 'GUITAR', 'OCEAN'
 ];
+const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-const boardSize = 8;
-const wordCount = 6;
-
-const generateBoard = (n, k) => {
-
-    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const tryGenerateBoard = (n, k) => {
     let board = Array.from({ length: n }, () => Array.from({ length: n }, () => null));
 
     const tryPlaceWord = (word) => {
@@ -89,18 +83,33 @@ const generateBoard = (n, k) => {
     return [board, words];
 };
 
-let boardData = generateBoard(boardSize, wordCount)
+const generateBoard = (n, k) => {
+    let i = 0
+    let board = null
+    let bestBoard = null
+    
+    while(i < 100 && (board == null || board[1].length < k)) {
+        board = tryGenerateBoard(n, k)
 
-const Game = () => {
-    const [board, setBoard] = useState(boardData[0]);
-    const [wordsToFind, setWordsToFind] = useState(boardData[1]);
+        if(!bestBoard || bestBoard[1].length < board[1].length)
+            bestBoard = board
+
+        i++
+    }
+    
+    return bestBoard
+}
+
+export default function Crossword({boardSize = 8, wordCount = 6}){
+    const [board, setBoard] = useState([]);
+    const [wordsToFind, setWordsToFind] = useState([]);
     const [foundWords, setFoundWords] = useState([]);
     const [selectedCells, setSelectedCells] = useState([]);
     const [message, setMessage] = useState('');
     const [animatingCells, setAnimatingCells] = useState([]);
 
     const restartGame = () => {
-        boardData = generateBoard(boardSize, wordCount)
+        const boardData = generateBoard(boardSize, wordCount)
         setBoard(boardData[0])
         setWordsToFind(boardData[1])
         setFoundWords([])
@@ -108,6 +117,10 @@ const Game = () => {
         setMessage('')
         setAnimatingCells([])
     }
+
+    useEffect(() => {
+        restartGame()
+    }, [])
 
 
     const checkWord = (selectedCells) => {
@@ -180,7 +193,7 @@ const Game = () => {
                     return (
                         <div
                             key={`${rowIndex}-${colIndex}`}
-                            className={`cell p-2  flex justify-center items-center aspect-square font-bold ${animatingCells.length == 0  && wordsToFind.length != foundWords.length? 'hover:bg-gray-700' : ''} ${isSelected ? 'bg-gray-600' : ''} ${isAnimating ? 'animating bg-green-600' : 'bg-base-200'}`}
+                            className={`cell p-2  flex justify-center items-center aspect-square font-bold ${animatingCells.length == 0 && wordsToFind.length != foundWords.length ? 'hover:bg-gray-700' : ''} ${isSelected ? 'bg-gray-600' : ''} ${isAnimating ? 'animating bg-green-600' : 'bg-base-200'}`}
                             style={{ width: `${100 / boardSize}%` }}
                             onClick={() => handleCellClick(rowIndex, colIndex)}
                         >
@@ -193,31 +206,27 @@ const Game = () => {
     };
 
     return (
-        <div className="flex justify-center mb-4">
-            <div className="flex w-[50rem] max-w-full flex-col-reverse md:flex-row gap-4 px-4">
-                <div className="bg-base-300 flex-grow flex flex-col gap-2 p-2"
-                    onContextMenu={(e) => handleClearSeledted(e)}
-                >
-                    {renderBoard()}
-                </div>
-                <div className="bg-base-300 w-full md:w-[18rem] p-4 md:text-center">
-                    <h3 className='font-bold text-xl mb-3'>Found Words</h3>
-                    <ul>
-                        {wordsToFind.map((word, index) => {
-                            const found = foundWords.includes(word);
-                            return (
-                                <li key={index} className={`mb-1 ${found ? 'font-bold text-green-500' : ''}`}>{word}</li>
-                            )
-                        })}
-                    </ul>
-                    {message && <div className="flex flex-row md:flex-col mt-3 gap-2 items-center flex-wrap">
-                        <div className=''>{message}</div>
-                        <button className='btn' onClick={() => restartGame()}>Play again</button>
-                    </div>}
-                </div>
+        <div className="flex w-[50rem] max-w-full flex-col-reverse md:flex-row gap-4 px-4">
+            <div className="bg-base-300 flex-grow flex flex-col gap-2 p-2"
+                onContextMenu={(e) => handleClearSeledted(e)}
+            >
+                {renderBoard()}
+            </div>
+            <div className="bg-base-300 w-full md:w-[18rem] p-4 md:text-center">
+                <h3 className='font-bold text-xl mb-3'>Found Words</h3>
+                <ul>
+                    {wordsToFind.map((word, index) => {
+                        const found = foundWords.includes(word);
+                        return (
+                            <li key={index} className={`mb-1 ${found ? 'font-bold text-green-500' : ''}`}>{word}</li>
+                        )
+                    })}
+                </ul>
+                {message && <div className="flex flex-row md:flex-col mt-3 gap-2 items-center flex-wrap">
+                    <div className=''>{message}</div>
+                    <button className='btn' onClick={() => restartGame()}>Play again</button>
+                </div>}
             </div>
         </div>
     );
-};
-
-export default Game;
+}

@@ -1,5 +1,6 @@
 import { FaTimes } from "react-icons/fa";
 
+//DaisyUi modal
 export default function Modal({ children, id, showModal = false, hideModal}) {
 
     const hide = () => {
